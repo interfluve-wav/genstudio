@@ -1,0 +1,14 @@
+# Render Blueprint for GenStudio (static site, free tier)
+# Deploy: Render dashboard -> New -> Blueprint -> connect interfluve-wav/genstudio
+# Or: render.yaml is picked up automatically on repo connect.
+services:
+  - type: web
+    name: genstudio
+    runtime: static
+    # No build command needed — the site is plain static files.
+    buildCommand: ""
+    staticPublishPath: .
+    pullRequestPreviews: true
+    autoDeploy: true
+    healthCheckPath: /index.html
+    # Free tier is selected automatically for static sites (no instance cost).
