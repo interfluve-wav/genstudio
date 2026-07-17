@@ -16,8 +16,8 @@
     * { box-sizing: border-box; }
     body { margin: 0; height: 100vh; display: flex;
       font-family: ui-sans-serif, system-ui, sans-serif; background: #0e0e10; color: #e8e8ea; }
-    #canvas-host { flex: 1; display: flex; align-items: center; justify-content: center; background: #141417; }
-    #panel { width: 310px; padding: 18px; overflow-y: auto; background: #1b1b1f; border-left: 1px solid #2a2a30; }
+    #canvas-host { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; justify-content: center; background: #141417; overflow: hidden; }
+    #panel { flex: 0 0 310px; width: 310px; padding: 18px; overflow-y: auto; background: #1b1b1f; border-left: 1px solid #2a2a30; }
     h1 { font-size: 16px; margin: 0 0 4px; letter-spacing: .5px; }
     .sub { font-size: 11px; color: #8a8a92; margin-bottom: 14px; }
     .row { margin-bottom: 11px; }
