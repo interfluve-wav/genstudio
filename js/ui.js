@@ -152,8 +152,6 @@ function buildUI() {
     window.GenStudio.redrawArt();
   });
 
-  el("render").addEventListener("click", () => window.GenStudio.redrawArt());
-
   el("exp-png").addEventListener("click", () => window.GenStudio.exportRaster("png"));
   el("exp-webp").addEventListener("click", () => window.GenStudio.exportRaster("webp"));
   el("exp-svg").addEventListener("click", () => window.GenStudio.exportSVG());
