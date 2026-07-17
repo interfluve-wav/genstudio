@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>GenStudio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; height: 100vh; display: flex;
+      font-family: ui-sans-serif, system-ui, sans-serif; background: #0e0e10; color: #e8e8ea; }
+    #canvas-host { flex: 1; display: flex; align-items: center; justify-content: center; background: #141417; }
+    #panel { width: 310px; padding: 18px; overflow-y: auto; background: #1b1b1f; border-left: 1px solid #2a2a30; }
+    h1 { font-size: 16px; margin: 0 0 4px; letter-spacing: .5px; }
+    .sub { font-size: 11px; color: #8a8a92; margin-bottom: 14px; }
+    .row { margin-bottom: 11px; }
+    label { font-size: 12px; display: flex; justify-content: space-between; margin-bottom: 4px; color: #c4c4cc; }
+    input[type=range] { width: 100%; }
+    select, button { width: 100%; padding: 7px; border-radius: 6px; border: 1px solid #33333a;
+      background: #26262c; color: #e8e8ea; font-size: 12px; }
+    button { cursor: pointer; margin-top: 4px; }
+    button:hover { background: #32323a; }
+    .value { color: #9bd1ff; }
+    .swatches { display: flex; gap: 4px; margin-top: 6px; }
+    .sw { flex: 1; height: 14px; border-radius: 3px; }
+    .grp { border-top: 1px solid #2a2a30; padding-top: 10px; margin-top: 10px; }
+    .grp h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: #8a8a92; margin: 0 0 8px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .badge { font-size: 10px; color: #5f9; margin-top: 12px; display: block; }
+    .exp { background: #20303a; }
+    .exp:hover { background: #27404c; }
+  </style>
+</head>
+<body>
+  <div id="canvas-host"></div>
+  <div id="panel">
+    <h1 id="brand-title">GenStudio</h1>
+    <div class="sub" id="brand-sub">Original generative engine · p5.js (MIT) · no watermark · you own it</div>
+
+    <div class="row">
+      <label>Composition</label>
+      <select id="comp">
+        <option value="symmetric">Symmetric Mandala</option>
+        <option value="flowfield">Flow Field</option>
+        <option value="truchet">Truchet Tiles</option>
+        <option value="voronoi">Voronoi Cells</option>
+        <option value="glyphfield">Glyph Field (charts)</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label>Preset</label>
+      <select id="presetSel"><option value="">— custom —</option></select>
+    </div>
+
+    <div class="grp">
+      <h2>Seed &amp; Color</h2>
+      <div class="row">
+        <label>Seed <span class="value" id="v-seed"></span></label>
+        <input type="range" id="seed" min="1" max="99999" step="1" />
+        <button id="rand-seed">Randomize Seed</button>
+      </div>
+      <div class="row">
+        <label>Base hue <span class="value" id="v-baseHue"></span></label>
+        <input type="range" id="baseHue" min="0" max="359" step="1" />
+      </div>
+      <div class="row">
+        <label>Harmony</label>
+        <select id="harmony">
+          <option value="golden">Golden angle</option>
+          <option value="analogous">Analogous</option>
+          <option value="triadic">Triadic</option>
+          <option value="complementary">Complementary</option>
+          <option value="tetradic">Tetradic</option>
+        </select>
+      </div>
+      <div class="swatches" id="sw"></div>
+    </div>
+
+    <div class="grp" id="grp-symmetric">
+      <h2>Symmetric</h2>
+      <div class="row">
+        <label>Symmetry (N-fold) <span class="value" id="v-sym"></span></label>
+        <input type="range" id="sym" min="2" max="24" step="1" />
+      </div>
+      <div class="row">
+        <label>Mirror (kaleidoscope) <span class="value" id="v-mir"></span></label>
+        <input type="range" id="mir" min="0" max="1" step="1" />
+      </div>
+      <div class="row">
+        <label>Shape</label>
+        <select id="shape">
+          <option value="petals">Petals</option>
+          <option value="dots">Dots</option>
+          <option value="polygons">Polygons</option>
+          <option value="lines">Lines</option>
+          <option value="stars">Stars</option>
+          <option value="rings">Rings</option>
+          <option value="cross">Cross</option>
+          <option value="leaf">Leaf</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Layers <span class="value" id="v-lay"></span></label>
+        <input type="range" id="lay" min="1" max="14" step="1" />
+      </div>
+      <div class="row">
+        <label>Motifs / ring <span class="value" id="v-per"></span></label>
+        <input type="range" id="per" min="3" max="28" step="1" />
+      </div>
+    </div>
+
+    <div class="grp" id="grp-flowfield">
+      <h2>Flow Field</h2>
+      <div class="row">
+        <label>Grid density <span class="value" id="v-flowGrid"></span></label>
+        <input type="range" id="flowGrid" min="12" max="140" step="1" />
+      </div>
+      <div class="row">
+        <label>Line weight <span class="value" id="v-flowWeight"></span></label>
+        <input type="range" id="flowWeight" min="0.5" max="8" step="0.1" />
+      </div>
+    </div>
+
+    <div class="grp" id="grp-truchet">
+      <h2>Truchet</h2>
+      <div class="row">
+        <label>Tiles <span class="value" id="v-truchetTiles"></span></label>
+        <input type="range" id="truchetTiles" min="4" max="40" step="1" />
+      </div>
+      <div class="row">
+        <label>Stroke weight <span class="value" id="v-truchetWeight"></span></label>
+        <input type="range" id="truchetWeight" min="1" max="10" step="0.5" />
+      </div>
+    </div>
+
+    <div class="grp" id="grp-glyphfield">
+      <h2>Glyph Field (charts)</h2>
+      <div class="row">
+        <label>Glyph shape</label>
+        <select id="glyph">
+          <option value="square">Square</option>
+          <option value="circle">Circle</option>
+          <option value="oval">Oval</option>
+          <option value="triangle">Triangle</option>
+          <option value="checker">Checker</option>
+          <option value="quadcircle">Quad Circle</option>
+          <option value="threedots">Three Dots</option>
+          <option value="cross">Cross</option>
+          <option value="clips">Clips</option>
+          <option value="pinholehex">Pinhole Hex</option>
+          <option value="star">Star</option>
+          <option value="heart">Heart</option>
+          <option value="spark">Spark</option>
+          <option value="flash">Flash</option>
+          <option value="arrow">Arrow</option>
+          <option value="flower">Flower</option>
+          <option value="flake">Flake</option>
+          <option value="diamond">Diamond</option>
+          <option value="pentagon">Pentagon</option>
+          <option value="hexagon">Hexagon</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Count <span class="value" id="v-glyphCount"></span></label>
+        <input type="range" id="glyphCount" min="100" max="6000" step="50" />
+      </div>
+      <div class="row">
+        <label>Scale <span class="value" id="v-glyphScale"></span></label>
+        <input type="range" id="glyphScale" min="0.5" max="8" step="0.1" />
+      </div>
+      <div class="row">
+        <label>Ease</label>
+        <select id="glyphEase">
+          <option>Linear</option><option>Sine In Out</option><option>Quad In Out</option>
+          <option>Cubic In Out</option><option>Expo In Out</option><option>Circ In Out</option><option>None</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grp" id="grp-voronoi">
+      <h2>Voronoi</h2>
+      <div class="row">
+        <label>Sites <span class="value" id="v-voronoiSites"></span></label>
+        <input type="range" id="voronoiSites" min="6" max="120" step="1" />
+      </div>
+    </div>
+
+    <div class="grp">
+      <h2>Color &amp; Blend</h2>
+      <div class="row">
+        <label>Color type</label>
+        <select id="colorType">
+          <option value="color">Solid Color</option>
+          <option value="sequence">Palette Sequence</option>
+          <option value="transition">Palette Transition</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Blend mode</label>
+        <select id="blend">
+          <option>Normal</option><option>XOR</option><option>Lighter</option><option>Multiply</option>
+          <option>Screen</option><option>Overlay</option><option>Darken</option><option>Lighten</option>
+          <option>Color Dodge</option><option>Color Burn</option><option>Hard Light</option><option>Soft Light</option>
+          <option>Exclusion</option><option>Difference</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h2>Distortion Fields</h2>
+      <div class="row">
+        <label>Frequency mode</label>
+        <select id="freqMode">
+          <option value="none">None</option>
+          <option value="sin">Sin</option>
+          <option value="cos">Cos</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Frequency layers <span class="value" id="v-freqLayers"></span></label>
+        <input type="range" id="freqLayers" min="1" max="16" step="1" />
+      </div>
+      <div class="row">
+        <label>Frequency base <span class="value" id="v-freqBase"></span></label>
+        <input type="range" id="freqBase" min="0.05" max="1" step="0.01" />
+      </div>
+      <div class="row">
+        <label>Frequency amp <span class="value" id="v-freqAmp"></span></label>
+        <input type="range" id="freqAmp" min="0" max="1.5" step="0.01" />
+      </div>
+      <div class="row">
+        <label>Swirl mode</label>
+        <select id="swirlMode">
+          <option value="none">None</option>
+          <option value="wave">Wave</option>
+          <option value="rotary">Rotary</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Swirl base <span class="value" id="v-swirlBase"></span></label>
+        <input type="range" id="swirlBase" min="-1" max="1" step="0.01" />
+      </div>
+      <div class="row">
+        <label>Swirl amp <span class="value" id="v-swirlAmp"></span></label>
+        <input type="range" id="swirlAmp" min="0" max="1" step="0.01" />
+      </div>
+    </div>
+
+    <div class="grp">
+      <h2>Tiled Pattern</h2>
+      <div class="row">
+        <label>Cells (grid) <span class="value" id="v-patternCells"></span></label>
+        <input type="range" id="patternCells" min="1" max="16" step="1" />
+      </div>
+      <div class="row">
+        <label>Offset <span class="value" id="v-patternOffset"></span></label>
+        <input type="range" id="patternOffset" min="0" max="1" step="0.01" />
+      </div>
+    </div>
+
+    <div class="grp">
+      <h2>Canvas &amp; Mask</h2>
+      <div class="row">
+        <label>Aspect ratio</label>
+        <select id="ratio">
+          <option value="1:1">1:1</option>
+          <option value="2:1">2:1</option>
+          <option value="16:9">16:9</option>
+          <option value="3:2">3:2</option>
+          <option value="4:3">4:3</option>
+          <option value="5:4">5:4</option>
+          <option value="4:5">4:5</option>
+          <option value="3:4">3:4</option>
+          <option value="2:3">2:3</option>
+          <option value="9:16">9:16</option>
+          <option value="1:2">1:2</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Mask mode</label>
+        <select id="maskMode">
+          <option value="none">None</option>
+          <option value="image">Image (fill dark)</option>
+          <option value="threshold">Luminance threshold</option>
+        </select>
+      </div>
+      <div class="row" id="grp-maskimg">
+        <label>Mask image</label>
+        <input type="file" id="mask-img" accept="image/*" style="font-size:11px" />
+      </div>
+      <div class="row" id="grp-maskthr">
+        <label>Threshold <span class="value" id="v-maskThreshold"></span></label>
+        <input type="range" id="maskThreshold" min="0" max="1" step="0.01" />
+      </div>
+      <div class="row" id="grp-maskbc">
+        <label>Brightness <span class="value" id="v-maskBright"></span></label>
+        <input type="range" id="maskBright" min="-1" max="1" step="0.01" />
+      </div>
+      <div class="row" id="grp-maskco">
+        <label>Contrast <span class="value" id="v-maskContrast"></span></label>
+        <input type="range" id="maskContrast" min="0.2" max="2.5" step="0.01" />
+      </div>
+      <div class="row" id="grp-maskinv">
+        <label>Invert mask <span class="value" id="v-maskInvert"></span></label>
+        <input type="range" id="maskInvert" min="0" max="1" step="1" />
+      </div>
+    </div>
+
+      <div class="row">
+        <label>Noise scale <span class="value" id="v-ns"></span></label>
+        <input type="range" id="ns" min="0.05" max="1.2" step="0.01" />
+      </div>
+      <div class="row">
+        <label>Noise amplitude <span class="value" id="v-na"></span></label>
+        <input type="range" id="na" min="0" max="1" step="0.01" />
+      </div>
+      <div class="row">
+        <label>Rotation <span class="value" id="v-rot"></span></label>
+        <input type="range" id="rot" min="0" max="6.28" step="0.01" />
+      </div>
+      <div class="row">
+        <label>Background</label>
+        <select id="bg">
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+          <option value="transparent">Transparent</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Color type</label>
+        <select id="colorType">
+          <option value="palette">Harmony palette</option>
+          <option value="paletteSeq">Palette sequence</option>
+          <option value="paletteTrans">Palette transition</option>
+          <option value="solid">Solid (base hue)</option>
+        </select>
+      </div>
+      <div class="row" id="grp-palette">
+        <label>Palette # <span class="value" id="v-paletteIndex"></span> / <span id="v-paletteTotal"></span></label>
+        <input type="range" id="paletteIndex" min="0" max="991" step="1" />
+      </div>
+      <div class="row" id="grp-palettespeed">
+        <label>Palette speed <span class="value" id="v-paletteSpeed"></span></label>
+        <input type="range" id="paletteSpeed" min="0" max="2" step="0.01" />
+      </div>
+      <div class="row" id="grp-basehue">
+        <label>Base hue <span class="value" id="v-baseHue"></span></label>
+        <input type="range" id="baseHue" min="0" max="360" step="1" />
+      </div>
+      <div class="row">
+        <label>Motion preset</label>
+        <select id="motion">
+          <option value="spin">Spin</option>
+          <option value="bloom">Bloom</option>
+          <option value="swirl">Swirl</option>
+          <option value="pulse">Pulse</option>
+          <option value="flow">Flow</option>
+          <option value="breathe">Breathe</option>
+          <option value="ripple">Ripple</option>
+          <option value="chaos">Chaos</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Export size</label>
+        <select id="sizeSel">
+          <option value="512">512 px</option>
+          <option value="1024">1024 px</option>
+          <option value="2048">2048 px</option>
+          <option value="4096">4096 px</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h2>Export</h2>
+      <div class="grid2">
+        <button class="exp" id="exp-png">PNG</button>
+        <button class="exp" id="exp-webp">WebP</button>
+        <button class="exp" id="exp-svg">SVG (vector)</button>
+        <button class="exp" id="exp-json">Preset JSON</button>
+        <button class="exp" id="exp-gif">GIF (anim)</button>
+        <button class="exp" id="exp-webm">WebM (video)</button>
+        <button class="exp" id="exp-mp4">MP4 (video)</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <label>Load preset JSON</label>
+        <input type="file" id="imp-json" accept="application/json" style="font-size:11px" />
+      </div>
+    </div>
+
+    <div class="row">
+      <button id="rand-all" style="background:#2a1f3a;font-weight:600">⚡ Randomize Everything</button>
+    </div>
+
+    <button id="render">Render</button>
+    <div id="status" style="font-size:11px;color:#9bd1ff;min-height:14px;margin:6px 0"></div>
+    <span class="badge" id="brand-badge">100% original code · owned by you · no watermark</span>
+
+
+  <script src="vendor/p5.min.js"></script>
+  <script src="vendor/gif.js"></script>
+  <script src="js/rng.js"></script>
+  <script src="js/geom.js"></script>
+  <script src="js/shapes.js"></script>
+  <script src="js/palette.js"></script>
+  <script src="js/presets.js"></script>
+  <script src="js/palettes.js"></script>
+  <script src="js/shapes_svg.js"></script>
+  <script src="js/fields.js"></script>
+  <script src="js/mask.js"></script>
+  <script src="js/branding.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/anim.js"></script>
+  <script src="js/media.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
