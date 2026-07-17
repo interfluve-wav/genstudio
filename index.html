@@ -17,6 +17,7 @@
     body { margin: 0; height: 100vh; display: flex;
       font-family: ui-sans-serif, system-ui, sans-serif; background: #0e0e10; color: #e8e8ea; }
     #canvas-host { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; justify-content: center; background: #141417; overflow: hidden; }
+    #canvas-host canvas { max-width: 100% !important; max-height: 100% !important; width: auto !important; height: auto !important; object-fit: contain; }
     #panel { flex: 0 0 310px; width: 310px; padding: 18px; overflow-y: auto; background: #1b1b1f; border-left: 1px solid #2a2a30; }
     h1 { font-size: 16px; margin: 0 0 4px; letter-spacing: .5px; }
     .sub { font-size: 11px; color: #8a8a92; margin-bottom: 14px; }
@@ -314,6 +315,8 @@
       </div>
     </div>
 
+    <div class="grp">
+      <h2>Global &amp; Animation</h2>
       <div class="row">
         <label>Noise scale <span class="value" id="v-ns"></span></label>
         <input type="range" id="ns" min="0.05" max="1.2" step="0.01" />
@@ -404,6 +407,7 @@
     <div id="status" style="font-size:11px;color:#9bd1ff;min-height:14px;margin:6px 0"></div>
     <span class="badge" id="brand-badge">100% original code · owned by you · no watermark</span>
 
+  </div>
 
   <script src="vendor/p5.min.js"></script>
   <script src="vendor/gif.js"></script>
